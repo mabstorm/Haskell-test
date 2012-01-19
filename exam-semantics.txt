@@ -1,0 +1,107 @@
+================================================================
+= DO NOT READ THIS FILE UNTIL YOU BEGIN THE COS 441 FINAL EXAM =
+================================================================
+
+=================================
+Simply Typed Lambda Calculus
+With Booleans, Sums and Functions
+==================================
+
+=======
+Syntax:
+=======
+
+(types)       t ::= Bool | t1 + t2 | t1 -> t2
+
+(expressions) e ::= x 
+                  | True | False 
+                  | if e then e2 else e3
+                  | Left e | Right e
+                  | case e of (Left x -> e2) (Right y -> e3) 
+                  | \x:t1.e | e1 e2
+
+(values)      v ::= True | False | Left v | Right v | \x:t1.e
+
+(contexts)    G ::= . | G,x:t
+
+=========================
+Call-by-value Evaluation:
+=========================
+
+e --> e'
+------------------------------------------------------- (E-if0)
+if e then e1 else e2 --> if e' then e1 else e2
+ 
+------------------------------------- (E-if1)
+if True then e1 else e2 --> e1
+ 
+------------------------------------- (E-if2)
+if False then e1 else e2 --> e2
+
+e1 --> e1'
+-------------------- (E-left)
+Left e1 --> Left e1'
+ 
+e1 --> e1'
+-------------------- (E-right)
+Right e1 --> Right e1'
+
+e --> e'
+------------------------------------------------------- (E-case1)
+case e of (Left x -> e2) (Right y -> e3) -->
+case e' of (Left x -> e2) (Right y -> e3)
+ 
+----------------------------------------------------------- (E-case2)
+case (Left v) of (Left x -> e2) (Right y -> e3) --> e2[v/x]
+ 
+----------------------------------------------------------- (E-case3)
+case (Right v) of (Left x -> e2) (Right y -> e3) --> e3[v/y]
+ 
+e1 --> e1'
+-------------------- (E-app1)
+e1 e2 --> e1' e2
+ 
+e2 --> e2'
+-------------------- (E-app2)
+v e2 --> v e2'
+ 
+--------------------- (E-app3)
+(\x:t.e) v --> e[v/x]
+ 
+=======
+Typing:
+=======
+ 
+G(x) = t
+----------------- (T-var)
+G |-- x : t
+ 
+--------------------- (T-True)
+G |-- True : bool
+ 
+---------------------- (T-False)
+G |-- False : bool
+ 
+G |-- e : bool     G |-- e1 : t    G |-- e2 : t
+----------------------------------------------------- (T-if)
+G |-- if e then e1 else e2 : t
+
+G |- e : t1
+---------------------- (T-Left)
+G |- Left e : t1 + t2 
+
+G |- e : t2
+---------------------- (T-Right)
+G |- Right e : t1 + t2 
+ 
+G |-- e : t1 + t2     G,x:t1 |-- e2 : t    G,y:t2 |-- e3 : t    x,y not in G
+------------------------------------------------------------------------------ (T-case)
+G |-- case e of (Left x -> e2) (Right y -> e3) : t
+
+G,x:t1 |-- e : t2                 x not in G
+--------------------------------------------- (T-fun)
+G |-- \x:t1.e : t1 -> t2
+ 
+G |-- e1 : t1 -> t2    G |-- e2 : t1
+------------------------------------------ (T-app)
+G |-- e1 e2 : t2
