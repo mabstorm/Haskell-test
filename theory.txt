@@ -1,0 +1,147 @@
+Michael Bailey (mabailey)
+Leon Ho (tlho)
+COS 441
+Assignment 2
+
+
+
+
+Part I:
+a.) Prove calculation, not induction, that for all r,
+circleArea r = area (circle r)
+
+
+Proof by calculation
+
+>> -1. Hard to read. When doing a proof like, start at the left (or right) and algebraically manipulate until you reach the right (or left). If you have to embed substeps, type set them differently so I know they aren't apart of the core algebra.
+
+For example, here is a proof:
+
+1. area (circle r)
+2. area (Ellipse r r)   (unfold circle)
+3. pi * r * r           (unfold area)
+4. circleArea r         (fold circleArea)
+
+1.) circleArea r = pi * r * r               (unfolding of def. of circleArea)
+2.) circle r = Ellipse r r                  (unfolding of def. of circle)
+3.) area (Ellipse r1 r2) = pi * r1 * r2     (unfolding of def. of area (Ellipse r1 r2))
+4.) area (Ellipse r r) = pi * r * r         (by 2, 3, substitution)
+5.) circleArea r = area(Ellipse r r)        (by 1, 4)
+
+
+Proof done
+
+
+
+
+b.) Prove by calculation, not induction, that for all s1 and s2,
+rectArea s1 s2 = area (Rectangle s1 s2)
+
+
+Proof by calculation
+
+>> -1 hard to read
+
+1.) rectArea s1 s2 = area (RtTriangle s1 s2) + area (RtTriangle s2 s1)
+                                                           (by unfolding of def. of rectArea)
+2.) area (RtTriangle s1 s2) = (s1 * s2) / 2                (by def. of area(RtTriangle))
+3.) area (RtTriangle s2 s1) = (s2 * s1) / 2                (by def. of area(RtTriangle))
+4.) (s1 * s2) / 2 = (s2 * s1) / 2                          (by commutativity of * )
+5.) area (RtTriangle s1 s2) = area (RtTriangle (s2 s1))    (by 4)
+6.) rectArea s1 s2 = 2 * area (RtTriangle s1 s2)           (by 1, 5)
+7.) 2 * area (RtTriangle s1 s2) = s1 * s2                  (by simple arithmetic, def of area(RtTriangle)
+8.) area (Rectangle s1 s2) = s1 * s2                       (by unfolding def. of area (Rectangle))
+9.) rectArea s1 s2 = area (Rectangle s1 s2)                (by 7, 8)
+
+
+Proof done
+
+
+
+
+
+
+Part II:
+a.) Theorem: For all finite lists x :: [(a,b)], zip (unzip xs) = xs
+
+
+Proof: By induction on the structure of xs
+
+
+Case: xs = [ ]
+
+
+1.) unzip xs = ([ ], [ ])        (by def. of unzip)
+2.) zip ([ ], _) = [ ]           (by def. of zip)
+3.) zip ([ ], [ ]) = [ ]         (by 2)
+4.) [ ] = xs                     (by equality)
+5.) zip (unzip ( xs ) ) = xs     (by 1, 3, 4)
+
+
+Case done
+
+>> -1 hard to read
+
+Case: xs = (x, y):xs’
+IH: zip ( unzip ( xs’ ) ) = xs’
+Prove zip(unzip ((x,y):xs’) =(x,y) xs’
+1.) unzip((x,y):xs’) = (x,y):unzip xs’                (by unfolding def of unzip)
+>> -1. You forgot the part where xs is rebound and ys is bound?
+2.) (x, y) : unzip xs’ = (x,y) : (xs, ys)             (by unfolding def of unzip)
+3.) zip ((x,y): (xs, ys)) = (x, y) : zip (xs, ys)     (by unfolding def of zip)
+4.) (x, y) : zip (xs, ys) = (x,y): zip (unzip (xs’))  (by reverse def of unzip)
+5.) (x,y): zip (unzip (xs’)) = (x,y) : xs’            (by IH)
+> -1 forgot the :
+6.)  zip(unzip ((x,y):xs’) =(x,y) xs’                 (by 1,2,3,4,5)
+
+
+Case done
+
+
+b) Counterexample - if xs is any list and ys is [ ] then zip(xs,ys) would be [ ] and the result of unzip would be ([ ] , [ ]) != (xs, ys)
+
+
+
+
+c.) Theorem: For all finite lists xs :: [Int] and ys :: [Int], max (maxs xs) (maxs ys) == maxs (xs ++ ys)
+
+
+Proof: By induction on the structure of xs
+Case xs = [ ]
+
+
+1.) max (maxs xs) (maxs ys) = max (minbound) (maxs ys)       (by def of maxs [ ])
+2.) max (minbound) (maxs ys) = maxs (minbound:ys)            (by reverse def of maxs)
+3.) maxs (minbound:ys)  = maxs (ys)                          (by def of maxs and minbound)
+4.) maxs(ys) = maxs([ ] ++ ys)                               (by def of ++)
+5.) maxs([ ] ++ ys) = maxs(xs ++ ys)                         (by substitution of xs)
+6.) max (maxs xs) (maxs ys) = maxs (xs ++ ys)                (by 1, 2, 3, 4, 5)
+
+
+Case done
+
+
+Case xs = x:xs’
+IH: max ( maxs xs’) (maxs ys) == maxs (xs’ ++ ys)
+
+
+Prove: max( maxs x:xs’) (maxs ys) = maxs (x:xs’ ++ ys)
+
+
+1.) max (maxs x:xs’) (maxs ys) = max (max x (maxs xs’)) (maxs ys)         (by def of maxs)
+>> -1 max (maxs xs') is ill-formed
+2.) max (max x (maxs xs’)) (maxs ys) = max x (max (maxs xs’)) (maxs ys)   (by associativity of max)
+>> I'm assuming you mean max x (max (maxs xs’) (maxs ys))
+3.) max x (max (maxs xs’)) (maxs ys) = max x (maxs (xs’ ++ ys))           (by IH)
+4.) max x (maxs (xs’ ++ ys))   = maxs(x:(xs’ ++ ys))                      (by reverse definition of max (x:xs))
+5.) maxs(x:(xs' ++ ys)) = maxs (x:xs’ ++ ys)                              (by def of : and ++)
+
+
+Case done
+
+
+d.) Counterexample - If xs is a list of strings, then length (3:xs) would not type check and thus would fail
+
+
+
+

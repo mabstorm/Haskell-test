@@ -2,9 +2,9 @@
 COS 441 Take-home Final
 -----------------------
 
-STUDENT NAME:
-STUDENT ID:
-TIME THIS EXAM WAS DOWNLOADED:  
+STUDENT NAME: Michael Bailey
+STUDENT ID: mabailey
+TIME THIS EXAM WAS DOWNLOADED: 9:00PM
 
 Read the instructions below carefully.
 
@@ -67,10 +67,13 @@ examination.
 
 Please copy the Honor Code here:
 
+I pledge my honor that I have not violated the Honor Code during this 
+examination.
 
 
 Type your name here to indicate you will abide by the honor code:
 
+Michael Bailey
 
 
 ===================================
@@ -100,7 +103,12 @@ Write an equivalent function called "threshold" that is not recursive
 itself but may call map, foldr, or foldl here:
 
 > threshold :: Int -> [Int] -> [Int]
-> threshold n xs = error "not implemented"
+> threshold n xs = map (threshold_helper n) xs
+
+> threshold_helper :: Int -> Int -> Int
+> threshold_helper n x =
+>   if x > n then x
+>            else 0
                                                                
 (b) [4 Points]
 
@@ -114,7 +122,14 @@ Write an equivalent function called "prefixAdd" that is not recursive
 itself but does call map, foldr, or foldl here:
 
 > prefixAdd :: [Int] -> [Int]
-> prefixAdd xs = error "not implemented"
+> prefixAdd xs = foldl (\acc x -> acc ++ [x+(addUntil x xs)]) [] xs
+
+> sum :: [Int] -> Int
+> sum xs = foldr (+) 0 xs
+
+> antiThreshold n xs = map (\x -> if x < n then x else 0) xs
+
+> addUntil n xs = foldr (+) 0 (antiThreshold n xs)
 
 ====================================
 
@@ -126,6 +141,8 @@ while (x > 0) { x = x + 1 }
 { x < -10 }
 
 Yes or No:
+
+No
 
 If yes, write the loop invariant you would use to prove that it is valid:
 
