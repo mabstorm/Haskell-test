@@ -164,11 +164,19 @@ http://www.cs.princeton.edu/~dpw/cos441-11/notes/exam-semantics.txt
 is well-typed by building a proof using the typing rules from the file
 above.  Proof (rewrite below):
 
-         <...>
-    ---------------------------------      --------------------------------------------
-    <... build proof upwards here...>      <...your lines may be as wide as your like ...>
----------------------------------------------------------------------------------------------
+
+Context after T-fun:
+let G = x:Bool
+
+
+G(x) = Bool
+---------(T-var)            ------------(T-True)      -----------(T-False)
+G|- x:Bool                   G|-True:Bool              G|-False:Bool
+-----------------------------------------------------------------(T-if)
+G |- if x then True else False : Bool
+---------------------------------------------------------------------------(T-fun)
 |- \x:Bool. if x then True else False  : Bool -> Bool
+
 
 
 (b)  [4 Points] Show that this program: 
@@ -178,13 +186,33 @@ above.  Proof (rewrite below):
 is well-typed by building a proof using the rules from the file above.
 Proof:
  
-                  <...>
-            -----------------------------     -----------------------------------------------
-            <... build proof upwards here>    <your lines may be as wide as your like ...>
----------------------------------------------------------------------------------------------
-|- \z:Bool + Bool. (case z of (Left x -> True) (Right y -> y)) : ???
+
+
+Context after T-fun:
+Let G = z:Bool + Bool
+
+
+G(z) = Bool+Bool                                    [G,y:t2](y) = t2
+------------(T-var)   -----------------(T-True)    ------------(T-var)
+G |- z:Bool+Bool       G,x:t1 |- True:Bool          G,y:t2 |- y:t2
+----------------------------------------------------------------------(T-case)
+            G |- case z of (Left x -> True) (Right y -> y) : Bool + t2 
+---------------------------------------------------------------------------------------------(T-fun)
+|- \z:Bool + Bool. (case z of (Left x -> True) (Right y -> y)) : Bool + t2
+
+
+
 
 (c) [2 Points] Explain (in general) what a "stuck expression" is:
+
+A "stuck expression" is an expression e where e is not a value and there
+does not exist an e' such that e->e'.
+
+  For us, this generally means that the expression has not completed its computation
+  because it does not have a value to return and it cannot complete its computation
+  because we have no more rules for being able to reduce it any further. This is generally
+  when something somewhere was poorly typed or the language is not complete to the extent
+  that this particular expression can be evaluated.
 
 
 
@@ -192,10 +220,23 @@ Proof:
 either a "Left" "Right" or "Case" expression in some way:
 
 
+  case True of (Left True -> True) (Right True -> True)
+
+
 
 (e) [2 Points] Explain what the canonical forms lemma should say about
 a sum type t1 + t2:
 
+  The canonical forms lemma says that knowing the type lets you know
+  something about the value. A sum type would then indicate that if
+  you know something belongs to the sum type, what you can deduce about
+  the value belongs to the sum of things you could know about values
+  belong to each type individually.
+
+  For example, if we know that the type of something is Bool + Int,
+  then we know the value must either be True, False, or a numerical
+  value. This comes from the canonical forms lemma being applied to
+  each type individually.
 
 
 (f) [10 Points] The preservation lemma says: 
@@ -217,11 +258,16 @@ case e of (Left x -> e2) (Right y -> e3) -->
 case e' of (Left x -> e2) (Right y -> e3)
  
 (1) |- case e of (Left x -> e2) (Right y -> e3) : t      (assumed)
+(2) |- e : t1 + t2                                       (by 1 and inversion of T-case typing rule)
+(3) |- e2 : t                                            (by 1 and inversion of T-case typing rule)
+(4) |- e3 : t                                            (by 1 and inversion of T-case typing rule)
+(5) |- e' : t1 + t2                                      (by 1, 2, and IH)
+(6) |- case e' of (Left x -> e2) (Right y -> e3) : t     (by 3,4,5)
 
-...<fill in here>...
-                  
-                 
+Preservation holds because still type t after taking a step e->e'
+
 <end case>
+
 
 
 case for rule (E-case2):
@@ -229,12 +275,24 @@ case for rule (E-case2):
 ----------------------------------------------------------- (E-case2)
 case (Left v) of (Left x -> e2) (Right y -> e3) --> e2[v/x]
 
-(1) |- case (Left v) of (Left x -> e2) (Right y -> e3) : t      (assumed)
+(1) |- case (Left v) of (Left x -> e2) (Right y -> e3) : t          (assumed)
+(2) |- v : t1+t2                                                    (by 1 and inversion of T-case typing rule)
+(3) |- e2 : t                                                       (by 1 and inversion of T-case typing rule)
+(4) |- x : t1                                                       (by 1 and inversion of T-case typing rule)
+(5) |- e3 : t                                                       (by 1 and inversion of T-case typing rule)
+(6) |- case (Left v) of (Left x -> e2) (Right y -> e3) --> e2[v/x]  (by 1 and E-case2)
+(7) |- e2[v/x] : t                                                  (by 2, substitution lemma, 1, 3)
 
-...<fill in here>...
-
+Preservation holds because we took a step from
+  case (Left v) of (Left x -> e2) (Right y -> e3) --> e2[v/x]
+to
+  e2[v/x]
+and maintained type t
 
 <end case>
+
+
+
 
 (g) [5 Points] The progress lemma states: 
 
