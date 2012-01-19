@@ -250,6 +250,9 @@ Canonical Forms, and Substitution lemmas have already been proven.  In
 other words, you may use any of those lemmas in your proof without
 proving them yourself.
 
+
+Proof by induction on the derivation of e --> e'
+
 case for rule (E-case1):
 
 (p1) e --> e'
@@ -306,13 +309,30 @@ Substitution lemmas have already been proven.  In other words, you may
 use any of those lemmas in your proof without proving them
 yourself. Prove the case that corresponds to the typing rule (T-Left).
 
+
+Proof by induction on the derivation of |- e:t
+
 case for rule (T-Left):
 
 G |- e : t1
 ---------------------- (T-Left)
 G |- Left e : t1 + t2 
 
-...<fill in here>...
+By IH and that e : t1
+(a) e is either a value, or
+(b) e -> e'
+
+subcase (a)
+e is value v -->
+Left v is a value (as stated by the language)
+
+subcase (b)
+|- e -> e'
+----------(E-left, IH)
+|- Left e -> Left e'
+
+Left e has two cases. e is either a value and Left e is a value,
+or e->e' so Left e->Left e' by T-Left. Progress lemma holds.
 
 <end case>
 
@@ -343,10 +363,13 @@ that helps you demonstrate precisely why the theorem you chose does not hold.
 
 Which one did you pick (Write Progress or Preservation here)?:   
 
-
+Progress
 
 Explanation:
 
+We would need a rule for E-case4 because currently
+  case (Middle v) (Left x -> e2) (Right y -> e3)     [small example program]
+type checks but cannot take a step.
 
 
 ===================================
@@ -417,7 +440,10 @@ Write an equivalent computation to eg1 above but use do notation instead
 of using >>= explicitly.
 
 > eg2 :: Result Int
-> eg2 = error "fill me in using do notation"
+> eg2 = do
+>   x <- many [3,4,5]
+>   y <- return 1
+>   return (x-y)
 
 (b) [10 Points]
 Write a function eval that evaluates expressions and returns a list of
@@ -437,8 +463,30 @@ necessary.  (In particular, use comments if you solve part of the
 problem to explain what you have and have not attempted to do.)
 Your solution may judged on style and elegance as well as correctness.
 
+Correctly does Add (Num 5) (Num 10) = 10
+
 > eval :: Exp -> [Int]
-> eval e = error "implement me"
+> eval (Add e1 e2) = do
+>   n1 <- eval e1
+>   n2 <- eval e2
+>   return (n1 + n2)
+
+Correctly does 3 + [] = []
+
+> eval (Neither) = []
+
+Correctly does both(2,3)+7=[9,10]
+Correctly does both(2,3)+both(4,5)=[6,7,7,8]
+Correctly does both(4,5)+neither=[]
+
+> eval (Both e1 e2) = do
+>   n1 <- eval e1
+>   n2 <- eval e2
+>   (return n1) ++ (return n2)
+
+Correctly returns the value from the Num
+
+> eval (Num e1) = return e1
 
 (c) [5 Points]  Consider any monad.
 
@@ -460,11 +508,45 @@ Justify each step of your proof using one of the laws above or by
 substitution of equals for equals or calculation as we have done in
 class.
 
-return x >>= (\a -> return y >>= (\b -> return (a+b)))  
+(I) return x >>= (\a -> return y >>= (\b -> return (a+b)))  
 =     
-return y >>= (\a -> return x >>= (\b -> return (a+b)))  
+(II) return y >>= (\a -> return x >>= (\b -> return (a+b)))  
+
+
+Do notation:
+(I)
+do
+a <- return y
+b <- return x
+return (a+b)
+=
+(II)
+do
+a <- return x
+b <- return y
+return (a+b)
 
 Proof:
+(1) return x >>= (\a -> return y >>= (\b -> return (a+b)))
+(2) = (return x >>= return) >>= (\b -> return (a+b))          (by unfolding L3)
+(3) = (return x) >>= (\b -> return (a+b))                     (by L1)
+(4) = return x                                                (by L2)
+...ran out of time
 
 
+(1) return x >>= (\a -> return y >>= (\b -> return (a+b)))
+(2) = (\a -> return y >>= (\b -> return (a+b))) x             (by L1)
+(3) = (\a -> ((\b -> return (a+b)) y)) x                      (by L1)
+(4) = 
+...ran out of time
+
+Simple explanation of proof...
+Referring to do notation:
+a+b=b+a (commutativity)
+In (I), a <- return y
+which is the same as b in the (II), b <- return y
+and the same is true for b <- return x (I) and a <- return x (II)
+thus we are essentially asking
+a+b=b+a
+which is true by commutativity
 
